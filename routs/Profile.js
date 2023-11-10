@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Profiledetails = require("../Model/profileDetails");
+const Profiledetails = require("../model/profileDetails");
 const { errormessage, successmessage } = require("../response/Response");
 const Authenticate = require("../Middleware/Authenticate");
 const CompanyDetail = require('../model/profileCompany')
