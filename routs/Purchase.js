@@ -47,7 +47,7 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
       totalamt,
     })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         return res.status(200).send(successmessage(["Add Successfully"]));
       })
       .catch((error) => {
@@ -146,18 +146,18 @@ router.post("/purchasedetails_update/:id",Authenticate, async (req, res) => {
 
 router.delete("/purchasedetails_delete/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
-  console.log(id)
+  // console.log(id)
   if (!id) {
     return res.status(402).send(errormessage("Required"));
   } else {
     Purchasedetails
       .findByIdAndDelete(id)
       .then((result) => {
-        console.log(result)
+        // console.log(result)
         return res.status(200).send(successmessage("Delete Successfully"));
       })
       .catch((err) => {
-        console.log(err)
+        // console.log(err)
         return res.status(402).send(errormessage(err));
       });
 

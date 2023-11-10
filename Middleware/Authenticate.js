@@ -19,7 +19,7 @@ const Authenticate = async (req, res, next) => {
         }
       })
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       res.status(401).send(errormessage("Token Mismatch"));
     }
   }

@@ -9,7 +9,7 @@ const MainBilltable = require("../model/maniBillTable");
 router.post("/payment_list", Authenticate, async (req, res) => {
   let { startDate, endDate, medical, status, id, salesmen } = req.body;
   const criteria = {};
-  console.log(req.body)
+  // console.log(req.body)
   const endDateAsDate = new Date(endDate);
   var dateToQuery = endDateAsDate.setHours(23, 59, 59, 999);
   var finalenddate = new Date(dateToQuery)
@@ -40,7 +40,7 @@ router.post("/payment_list", Authenticate, async (req, res) => {
   }
 
 
-  console.log(criteria)
+  // console.log(criteria)
   if (criteria.status === true) {
     MainpaymentDetails.find(criteria, null, { sort: { date: -1 } })
 
@@ -72,7 +72,7 @@ router.post("/payment_list", Authenticate, async (req, res) => {
   } else {
     MainBilltable.find(criteria, null, { sort: { date: -1 } })
       .then((result) => {
-        // console.log(result)
+        // // console.log(result)
         const groupedData = result.reduce((result, record) => {
           const existingGroup = result.find(
             (group) => group.medical === record.medical
@@ -95,7 +95,7 @@ router.post("/payment_list", Authenticate, async (req, res) => {
         return res.status(200).json(successmessage(data));
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         return res.status(500).json(errormessage(error));
       });
   }
@@ -103,7 +103,7 @@ router.post("/payment_list", Authenticate, async (req, res) => {
 
 router.get("/payment_list_seperate/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
-  console.log(id);
+  // console.log(id);
   PaymentDeatails.find(
     {
       invoiceId: id,

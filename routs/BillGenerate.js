@@ -73,28 +73,28 @@ router.post("/mainbill_list", Authenticate, async (req, res) => {
 
 router.get("/subbill_list/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
-  console.log(id);
+  // console.log(id);
   MainBilltable.find({ medical: id }, { __v: 0 })
     .then((result) => {
-      console.log(result);
+      // console.log(result);
       return res.status(200).json(successmessage(result));
     })
     .catch((error) => {
-      console.log(error);
+      // console.log(error);
       return res.status(500).send(errormessage(error));
     });
 });
 
 router.get("/subbill_list_model/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
-  console.log(id);
+  // console.log(id);
   Billgeneratesub.find({ invoiceId: id }, { __v: 0 })
     .then((result) => {
-      console.log(result);
+      // console.log(result);
       return res.status(200).json(successmessage(result));
     })
     .catch((error) => {
-      console.log(error);
+      // console.log(error);
       return res.status(500).send(errormessage(error));
     });
 });
@@ -128,7 +128,7 @@ router.post("/createbill", Authenticate, async (req, res) => {
       var updadtedqty = find_party.quantity - data.qty;
 
       medicalid = data.medicalname;
-      console.log(data);
+      // console.log(data);
       Billgeneratesub.create({
         medical: data.medicalname,
         product: data.proname,
@@ -140,18 +140,18 @@ router.post("/createbill", Authenticate, async (req, res) => {
         salesmen: data.salesmen,
       })
         .then((result) => {
-          console.log("add in bill table", result);
+          // console.log("add in bill table", result);
         })
         .catch((err) => {
-          console.log(err);
+          // console.log(err);
         });
       productdetails
         .updateOne({ _id: data.proname }, { $set: { quantity: updadtedqty } })
         .then((result) => {
-          console.log("add in bill table", result);
+          // console.log("add in bill table", result);
         })
         .catch((err) => {
-          console.log(err);
+          // console.log(err);
         });
     });
 
@@ -164,15 +164,15 @@ router.post("/createbill", Authenticate, async (req, res) => {
       salesmen: record[0].salesmen,
     })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
         return res.status(200).send(successmessage(["Create Successfully"]));
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
         return res.status(402).send(errormessage(error));
       });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(500).json(errormessage(error));
   }
 });
@@ -194,7 +194,7 @@ router.post("/mainbill_receive", Authenticate, async (req, res) => {
         { new: true } // To return the updated document
       )
         .then((resu) => {
-          console.log(resu);
+          // console.log(resu);
           return res.status(200).json(successmessage(["Update Successfully"]));
         })
         .catch((err) => {
@@ -208,14 +208,14 @@ router.post("/mainbill_receive", Authenticate, async (req, res) => {
 
 router.get("/billdetails_update_detail/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
-  console.log(id);
+  // console.log(id);
   Billgeneratesub.find({ invoiceId: id }, { __v: 0 })
     .then((result) => {
-      // console.log(result)
+      // // console.log(result)
       return res.status(200).send(successmessage(result));
     })
     .catch((error) => {
-      console.log(error);
+      // console.log(error);
       return res.status(500).send(errormessage(error));
     });
 });
@@ -235,7 +235,7 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
         });
         let find_party = await productdetails.findById(data.product);
         if (data.new === true) {
-          console.log("new true");
+          // console.log("new true");
           Billgeneratesub.create({
             medical: record[0].medical,
             product: data.product,
@@ -247,10 +247,10 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
             salesmen: record[0].salesmen,
           })
             .then((result) => {
-              console.log("add in bill table", result);
+              // console.log("add in bill table", result);
             })
             .catch((err) => {
-              console.log(err);
+              // console.log(err);
             });
           var updadtedqtyfornew = find_party.quantity - data.qty;
           productdetails
@@ -259,17 +259,17 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
               { $set: { quantity: updadtedqtyfornew } }
             )
             .then((result) => {
-              console.log("add in bill table", result);
+              // console.log("add in bill table", result);
             })
             .catch((err) => {
-              console.log(err);
+              // console.log(err);
             });
         } else {
-          console.log("inside else");
+          // console.log("inside else");
           findProduct.map((e) => {
             if (new ObjectId(e._id).equals(data._id)) {
               let new_data = {};
-              console.log("selected profuct", e);
+              // console.log("selected profuct", e);
               if (data.medical) {
                 if (
                   !new ObjectId(e.medical).equals(new ObjectId(data.medical))
@@ -292,22 +292,22 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
                 if (updateqty > 0) {
                   updateqty = parseInt(find_party.quantity, 10) + updateqty;
                   new_data.qty = data.qty;
-                  console.log("updtqty if", updateqty);
+                  // console.log("updtqty if", updateqty);
                   productdetails
                     .updateOne(
                       { _id: data.product },
                       { $set: { quantity: updateqty } }
                     )
                     .then((result) => {
-                      console.log("add in product table", result);
+                      // console.log("add in product table", result);
                     })
                     .catch((err) => {
-                      console.log(err);
+                      // console.log(err);
                     });
                 } else {
                   updateqty = parseInt(find_party.quantity, 10) + updateqty;
                   new_data.qty = data.qty;
-                  console.log("updtqty else", updateqty);
+                  // console.log("updtqty else", updateqty);
 
                   productdetails
                     .updateOne(
@@ -315,26 +315,26 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
                       { $set: { quantity: updateqty } }
                     )
                     .then((result) => {
-                      console.log("add in product table", result);
+                      // console.log("add in product table", result);
                     })
                     .catch((err) => {
-                      console.log(err);
+                      // console.log(err);
                     });
                 }
               }
               if (data.amount) {
                 new_data.amount = data.amount;
               }
-              console.log("new data", new_data);
+              // console.log("new data", new_data);
               Billgeneratesub.findByIdAndUpdate(data._id, { $set: new_data })
                 .then((result) => {
-                  console.log("add in bill sub table", result);
+                  // console.log("add in bill sub table", result);
                 })
                 .catch((err) => {
-                  console.log(err);
+                  // console.log(err);
                 });
             } else {
-              console.log("else entry for delete colum", e._id);
+              // console.log("else entry for delete colum", e._id);
             }
           });
         }
@@ -353,10 +353,10 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
       if (totalamt) {
         new_data.totalPayable = totalamt;
       }
-      // console.log("main table", new_data);
+      // // console.log("main table", new_data);
       const findProduct = await Billgeneratesub.find({ invoiceId: id });
-      console.log(findProduct);
-      console.log(record);
+      // console.log(findProduct);
+      // console.log(record);
 
       var result = findProduct
         .filter(function (o1) {
@@ -369,10 +369,10 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
           let updtqty = parseInt(find_party.quantity, 10) + deleterecord.qty;
           Billgeneratesub.findByIdAndDelete(deleterecord._id)
             .then((result) => {
-              console.log("add in bill sub table", result);
+              // console.log("add in bill sub table", result);
             })
             .catch((err) => {
-              console.log(err);
+              // console.log(err);
             });
           productdetails
             .updateOne(
@@ -380,10 +380,10 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
               { $set: { quantity: updtqty } }
             )
             .then((result) => {
-              console.log("add in product table", result);
+              // console.log("add in product table", result);
             })
             .catch((err) => {
-              console.log(err);
+              // console.log(err);
             });
         });
       MainBilltable.updateOne(
@@ -392,7 +392,7 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
         { new: true }
       )
         .then((result) => {
-          console.log("add in bill  main table", result);
+          // console.log("add in bill  main table", result);
           return res.status(200).send(successmessage(["Update Successfully"]));
         })
         .catch((err) => {
@@ -419,18 +419,18 @@ router.delete("/billdetails_delete/:id", Authenticate, async (req, res) => {
         productdetails
           .updateOne({ _id: data.product }, { $set: { quantity: updadtedqty } })
           .then((result) => {
-            console.log("add in bill table", result);
+            // console.log("add in bill table", result);
           })
           .catch((err) => {
-            console.log(err);
+            // console.log(err);
           });
 
         Billgeneratesub.findOneAndDelete({ invoiceId: data.invoiceId })
           .then((result) => {
-            console.log(result);
+            // console.log(result);
           })
           .catch((err) => {
-            console.log(err);
+            // console.log(err);
           });
       });
 

@@ -29,7 +29,7 @@ router.get("/productdetailsSeperate_list", Authenticate, async (req, res) => {
 
 router.post("/productdetails_add", Authenticate, async (req, res) => {
   let { name, quantity, rate, expiry, mrp } = req.body;
-  console.log(req.body);
+  // console.log(req.body);
   let error = [];
   if (!name || !quantity || !rate || !mrp || !expiry) {
     if (!name) {
@@ -58,7 +58,7 @@ router.post("/productdetails_add", Authenticate, async (req, res) => {
         expiry,
       })
       .then((result) => {
-        console.log(result._id);
+        // console.log(result._id);
         productdetailsSeperate
           .create({
             product_ref: result._id,
@@ -170,11 +170,11 @@ router.post("/productdetails_update/:id", Authenticate, async (req, res) => {
           expiry,
         })
         .then((result) => {
-          console.log(result);
+          // console.log(result);
           // return res.status(200).send(successmessage(["Add Successfully"]));
         })
         .catch((error) => {
-          console.log(error);
+          // console.log(error);
           // return res.status(500).send(errormessage(error));
         });
     }
@@ -198,10 +198,10 @@ router.delete("/productdetails_delete/:id", Authenticate, async (req, res) => {
     productdetailsSeperate
       .deleteMany({ product_ref: id })
       .then((result) => {
-        console.log(result);
+        // console.log(result);
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
       });
   }
 });

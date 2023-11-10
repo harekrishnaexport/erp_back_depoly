@@ -177,14 +177,14 @@ router.post("/Profiledetails_profile_add", Authenticate, async (req, res) => {
 
 router.post("/Profiledetails_profile_update/:id", async (req, res) => {
   let { comname,comnumber } = req.body;
-  console.log(req.body)
+  // console.log(req.body)
   let id = req.params.id;
   let error = [];
   if (!id) {
-    console.log('hi')
+    // console.log('hi')
     return res.status(402).send(errormessage("Required"));
   } else {
-    console.log('hidsd')
+    // console.log('hidsd')
 
     if (!comname || !comnumber) {
       if (!comname) {
