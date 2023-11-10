@@ -19,9 +19,9 @@ app.use(bodyParser.json());
 app.use("/api", routs);
 
 app.get("/", (req, res) => {
-  res.send("server Running sstpl");
+  res.send("server Running hkipl");
 });
 
-app.listen(5000, () => {
+app.listen(PORT, () => {
   console.log(`running ${PORT}`);
 });
