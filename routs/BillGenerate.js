@@ -353,10 +353,8 @@ router.post("/billdetails_update/:id", Authenticate, async (req, res) => {
       if (totalamt) {
         new_data.totalPayable = totalamt;
       }
-      // // console.log("main table", new_data);
+
       const findProduct = await Billgeneratesub.find({ invoiceId: id });
-      // console.log(findProduct);
-      // console.log(record);
 
       var result = findProduct
         .filter(function (o1) {

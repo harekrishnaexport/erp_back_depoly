@@ -20,8 +20,11 @@ const PurchaseDetailsSchema = new Schema({
   totalamt: {
     type: String,
   },
-  invoiceId:{
+  invoiceId: {
     type: Number,
+  },
+  sellingRate: {
+    type: String,
   },
   date: {
     type: Date,

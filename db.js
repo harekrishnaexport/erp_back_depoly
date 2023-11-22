@@ -7,12 +7,11 @@ const mongoconnect = async () => {
     mongoose.connect(mongourl, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      
     }).then((result) => {
-       console.log('connect')
+      console.log('connect')
     })
   } catch (error) {
-     console.log("mongoose error ===================>", error);
+    console.log("mongoose error ===================>", error);
   }
 };
 

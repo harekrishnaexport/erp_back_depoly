@@ -4,6 +4,7 @@ const productdetails = require("../model/productDetails");
 const productdetailsSeperate = require("../model/productchangestatus");
 const { errormessage, successmessage } = require("../response/Response");
 const Authenticate = require("../Middleware/Authenticate");
+const ProductList = require("../model/ProductList");
 
 router.get("/product_list", Authenticate, async (req, res) => {
   productdetails
@@ -81,6 +82,7 @@ router.post("/productdetails_add", Authenticate, async (req, res) => {
       });
   }
 });
+
 
 router.get("/productdetails_update_detail/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
@@ -202,6 +204,95 @@ router.delete("/productdetails_delete/:id", Authenticate, async (req, res) => {
       })
       .catch((err) => {
         // console.log(err);
+      });
+  }
+});
+
+
+
+// list of name poduct
+router.get("/product_list_seperate", Authenticate, async (req, res) => {
+  ProductList
+    .find({}, null, { sort: { date: -1 } })
+    .then((result) => {
+      return res.status(200).json(successmessage(result));
+    })
+    .catch((error) => {
+      return res.status(500).send(errormessage(error));
+    });
+});
+
+
+router.post("/productlist_add", Authenticate, async (req, res) => {
+  let { name } = req.body;
+  // console.log(req.body);
+  let error = [];
+  if (!name) {
+    return res.status(402).json(errormessage(error));
+  } else {
+    try {
+      const result = await ProductList.create({ name });
+      return res.status(200).send(successmessage(["Add Successfully"]));
+    } catch (error) {
+      if (error.code === 11000 && error.keyPattern && error.keyPattern.name) {
+        return res.status(402).json(errormessage("Name must be unique."));
+      } else {
+        return res.status(500).send(errormessage(error));
+      }
+    }
+  }
+});
+
+router.get("/productdetails_update_list/:id", Authenticate, async (req, res) => {
+  let id = req.params.id;
+  ProductList
+    .findById(id, { __v: 0 })
+    .then((result) => {
+      return res.status(200).send(successmessage(result));
+    })
+    .catch((error) => {
+      return res.status(500).send(errormessage(error));
+    });
+}
+);
+
+router.post("/productdetails_update_list/:id", Authenticate, async (req, res) => {
+  let { name } = req.body;
+  let id = req.params.id;
+
+  let error = [];
+  if (!id) {
+    return res.status(402).send(errormessage("Required"));
+  } else {
+    if (!name) {
+      return res.status(402).json(errormessage('Required'));
+    } else {
+      try {
+        const result = await ProductList.findByIdAndUpdate(id, { $set: name }, { new: true });
+        return res.status(200).send(successmessage(["Update Successfully"]));
+      } catch (error) {
+        if (error.code === 11000 && error.keyPattern && error.keyPattern.name) {
+          return res.status(402).json(errormessage("Name must be unique."));
+        } else {
+          return res.status(500).send(errormessage(error));
+        }
+      }
+    }
+  }
+});
+
+router.delete("/productdetails_delete_list/:id", Authenticate, async (req, res) => {
+  let id = req.params.id;
+  if (!id) {
+    return res.status(402).send(errormessage("Required"));
+  } else {
+    ProductList
+      .findByIdAndDelete(id)
+      .then((result) => {
+        return res.status(200).send(successmessage("Delete Successfully"));
+      })
+      .catch((err) => {
+        return res.status(402).send(errormessage(err));
       });
   }
 });
