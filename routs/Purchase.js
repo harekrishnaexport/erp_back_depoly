@@ -3,8 +3,10 @@ const router = express.Router();
 const Purchasedetails = require("../model/purchase");
 const { errormessage, successmessage } = require("../response/Response");
 const Authenticate = require("../Middleware/Authenticate");
+const CountermodleforPurchase = require("../model/CountermodleforPurchase");
+const MainPurchasetable = require("../model/MainPurchasetable");
 
-router.get("/purchase_list",Authenticate, async (req, res) => {
+router.get("/purchase_list", Authenticate, async (req, res) => {
   Purchasedetails.find({}, null, { sort: { date: -1 } })
     .then((result) => {
       return res.status(200).json(successmessage(result));
@@ -14,46 +16,117 @@ router.get("/purchase_list",Authenticate, async (req, res) => {
     });
 });
 
+router.get("/purchasemaintbl_list", Authenticate, async (req, res) => {
+  MainPurchasetable.find({}, null, { sort: { date: -1 } })
+    .then((result) => {
+      return res.status(200).json(successmessage(result));
+    })
+    .catch((error) => {
+      return res.status(500).send(errormessage(error));
+    });
+});
+
 router.post("/purchasedetails_add", Authenticate, async (req, res) => {
-  let { name, quantity, rate, expiry, party, totalamt } = req.body;
+  let { name, quantity, rate, expiry, party, totalAmount, record } = req.body;
   let error = [];
-  if (!name || !quantity || !rate || !party || !expiry || !totalamt) {
-    if (!name) {
-      error.push("Required");
-    }
-    if (!quantity) {
-      error.push("Required");
-    }
-    if (!rate) {
-      error.push("Required");
-    }
-    if (!party) {
-      error.push("Required");
-    }
-    if (!expiry) {
-      error.push("Required");
-    }
-    if (!totalamt) {
-      error.push("Required");
-    }
-    return res.status(402).json(errormessage(error));
+  // if (!name || !quantity || !rate || !party || !expiry || !totalamt) {
+  //   if (!name) {
+  //     error.push("Required");
+  //   }
+  //   if (!quantity) {
+  //     error.push("Required");
+  //   }
+  //   if (!rate) {
+  //     error.push("Required");
+  //   }
+  //   if (!party) {
+  //     error.push("Required");
+  //   }
+  //   if (!expiry) {
+  //     error.push("Required");
+  //   }
+  //   if (!totalamt) {
+  //     error.push("Required");
+  //   }
+  //   return res.status(402).json(errormessage(error));
+  // } else {
+  //   Purchasedetails.create({
+  //     name,
+  //     quantity,
+  //     rate,
+  //     party,
+  //     expiry,
+  //     totalamt,
+  //   })
+  //     .then((result) => {
+  //       // console.log(result);
+  //       return res.status(200).send(successmessage(["Add Successfully"]));
+  //     })
+  //     .catch((error) => {
+  //       return res.status(500).send(errormessage(error));
+  //     });
+  // }
+
+  let cd = await CountermodleforPurchase.findOneAndUpdate(
+    { titles: "autoval" },
+    { $inc: { id: 1 } },
+    { new: true }
+  );
+
+  let sqid;
+  if (cd === null) {
+    const newval = new CountermodleforPurchase({ titles: "autoval", id: 1 });
+    await newval.save();
+    sqid = 1;
   } else {
+    sqid = cd.id;
+  }
+  console.log(record)
+  let result = record.map(async (data) => {
+    // let find_party = await productdetails.findById(data.proname);
+    // var updadtedqty = find_party.quantity - data.qty;
+
+    medicalid = data.medicalname;
+    // console.log(data);
     Purchasedetails.create({
-      name,
-      quantity,
-      rate,
-      party,
-      expiry,
-      totalamt,
+      name:data.name,
+      quantity:data.quantity,
+      invoiceId: sqid,
+      rate:data.rate,
+      party:data.party,
+      expiry:data.expiry,
+      totalamt:data.totalamt,
+      sellingRate: data.srate,
     })
       .then((result) => {
-        // console.log(result);
-        return res.status(200).send(successmessage(["Add Successfully"]));
+        // console.log("add in bill table", result);
       })
-      .catch((error) => {
-        return res.status(500).send(errormessage(error));
+      .catch((err) => {
+        // console.log(err);
       });
-  }
+    // productdetails
+    //   .updateOne({ _id: data.proname }, { $set: { quantity: updadtedqty } })
+    //   .then((result) => {
+    //     // console.log("add in bill table", result);
+    //   })
+    //   .catch((err) => {
+    //     // console.log(err);
+    //   });
+  });
+
+  MainPurchasetable.create({
+    invoiceId: sqid,
+    party: record[0].party,
+    totalamt: totalAmount,
+  })
+    .then((result) => {
+      // console.log(result);
+      return res.status(200).send(successmessage(["Create Successfully"]));
+    })
+    .catch((error) => {
+      // console.log(error);
+      return res.status(402).send(errormessage(error));
+    });
 });
 
 router.get(
@@ -71,7 +144,7 @@ router.get(
   }
 );
 
-router.post("/purchasedetails_update/:id",Authenticate, async (req, res) => {
+router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
   let { name, quantity, rate, expiry, party, totalamt } = req.body;
   let id = req.params.id;
   // var jsondata;
@@ -150,8 +223,7 @@ router.delete("/purchasedetails_delete/:id", Authenticate, async (req, res) => {
   if (!id) {
     return res.status(402).send(errormessage("Required"));
   } else {
-    Purchasedetails
-      .findByIdAndDelete(id)
+    Purchasedetails.findByIdAndDelete(id)
       .then((result) => {
         // console.log(result)
         return res.status(200).send(successmessage("Delete Successfully"));
@@ -160,8 +232,6 @@ router.delete("/purchasedetails_delete/:id", Authenticate, async (req, res) => {
         // console.log(err)
         return res.status(402).send(errormessage(err));
       });
-
-    
   }
 });
 module.exports = router;

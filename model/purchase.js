@@ -20,6 +20,9 @@ const PurchaseDetailsSchema = new Schema({
   totalamt: {
     type: String,
   },
+  invoiceId:{
+    type: Number,
+  },
   date: {
     type: Date,
     default: Date.now,
