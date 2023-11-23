@@ -225,7 +225,6 @@ router.get("/product_list_seperate", Authenticate, async (req, res) => {
 
 router.post("/productlist_add", Authenticate, async (req, res) => {
   let { name } = req.body;
-  // console.log(req.body);
   let error = [];
   if (!name) {
     return res.status(402).json(errormessage(error));
@@ -268,7 +267,7 @@ router.post("/productdetails_update_list/:id", Authenticate, async (req, res) =>
       return res.status(402).json(errormessage('Required'));
     } else {
       try {
-        const result = await ProductList.findByIdAndUpdate(id, { $set: name }, { new: true });
+        const result = await ProductList.findByIdAndUpdate(id, { $set: {name} }, { new: true });
         return res.status(200).send(successmessage(["Update Successfully"]));
       } catch (error) {
         if (error.code === 11000 && error.keyPattern && error.keyPattern.name) {
