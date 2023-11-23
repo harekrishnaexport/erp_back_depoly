@@ -49,9 +49,9 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
       sqid = cd.id;
     }
     let result = record.map(async (data) => {
-
-      let find_party = await productdetails.find({name:data.name});
-      if (find_party === null) {
+      console.log(data)
+      let find_party = await productdetails.find({ name: data.name });
+      if (find_party.length === 0) {
         Purchasedetails.create({
           name: data.name,
           quantity: data.quantity,
@@ -61,6 +61,7 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
           expiry: data.expiry,
           totalamt: data.totalamt,
           sellingRate: data.srate,
+          mrp: data.mrp
         })
           .then((result) => {
             // console.log("add in bill table", result);
@@ -68,13 +69,13 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
           .catch((err) => {
             // console.log(err);
           });
-          productdetails
+        productdetails
           .create({
-            name:data.name,
-            quantity:data.quantity,
-            rate:data.rate,
-            mrp:data.mrp,
-            expiry:data.expiry,
+            name: data.name,
+            quantity: data.quantity,
+            rate: data.rate,
+            mrp: data.mrp,
+            expiry: data.expiry,
           })
           .then((result) => {
             console.log(result);
@@ -91,6 +92,7 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
           expiry: data.expiry,
           totalamt: data.totalamt,
           sellingRate: data.srate,
+          mrp: data.mrp
         })
           .then((result) => {
             // console.log("add in bill table", result);
@@ -98,9 +100,7 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
           .catch((err) => {
             // console.log(err);
           });
-
-        var updadtedqty = parseInt(find_party.quantity, 10) + parseInt(data.quantity, 10);
-
+        var updadtedqty = parseInt(find_party[0].quantity, 10) + parseInt(data.quantity, 10);
         let new_data = {};
         if (data.name) {
           new_data.name = data.name;
@@ -108,8 +108,8 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
         if (data.quantity) {
           new_data.quantity = updadtedqty;
         }
-        if (data.rate) {
-          new_data.rate = data.rate;
+        if (data.srate) {
+          new_data.rate = data.srate;
         }
         if (data.mrp) {
           new_data.mrp = data.mrp;
@@ -117,14 +117,16 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
         if (data.expiry) {
           new_data.expiry = data.expiry;
         }
+        console.log(new_data)
         productdetails
-        .findOneAndUpdate({name:data.name}, { $set: new_data }, { new: true })
-        .then((result) => {
-          return res.status(200).send(successmessage(result));
-        })
-        .catch((err) => {
-          return res.status(402).send(errormessage(error));
-        });
+          .findOneAndUpdate({ name: data.name }, { $set: new_data }, { new: true })
+          .then((result) => {
+            // return res.status(200).send(successmessage(result));
+          })
+          .catch((err) => {
+            console.log(err)
+            // return res.status(402).send(errormessage(err));
+          });
       }
     });
 
@@ -161,8 +163,7 @@ router.get(
 );
 
 router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
-  let { name, quantity, rate, expiry, party, totalamt, record, totalAmount } =
-    req.body;
+  let { record, totalAmount } = req.body;
   let id = req.params.id;
   try {
     if (!id) {
@@ -172,11 +173,29 @@ router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
         const findProduct = await Purchasedetails.find({
           invoiceId: data.invoiceId,
         });
-        console.log("loop data", data);
+        const findProduct_update = await productdetails.find({
+          name: data.name,
+        });
 
         findProduct.map((e) => {
           if (new ObjectId(e._id).equals(new ObjectId(data._id))) {
-            console.log("Ids are equal");
+            console.log("Ids are equal", e);
+            var updadtedqty;
+            var updtqtyin_pro;
+
+            if (e.quantity > data.quantity) {
+              updadtedqty = parseInt(e.quantity, 10) - parseInt(data.quantity, 10)
+              updtqtyin_pro = parseInt(findProduct_update[0].quantity, 10) - updadtedqty
+            } else if (e.quantity < data.quantity) {
+              updadtedqty = parseInt(data.quantity, 10) - parseInt(e.quantity, 10)
+              updtqtyin_pro = parseInt(findProduct_update[0].quantity, 10) + updadtedqty
+
+            } else {
+              updadtedqty = 0
+              updtqtyin_pro = parseInt(findProduct_update[0].quantity, 10)
+
+            }
+
             let new_data = {};
             if (data.name) {
               new_data.name = data.name;
@@ -197,9 +216,26 @@ router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
               new_data.totalamt = data.totalamt;
             }
             if (data.sellingRate) {
-              new_data.sellingRate = data.srate;
+              new_data.sellingRate = data.sellingRate;
             }
-            // console.log(e._id)
+
+
+            let product_data = {};
+            if (data.name) {
+              product_data.name = data.name;
+            }
+            if (data.quantity) {
+              product_data.quantity = updtqtyin_pro;
+            }
+            if (data.sellingRate) {
+              product_data.rate = data.sellingRate;
+            }
+            if (data.expiry) {
+              product_data.expiry = data.expiry;
+            }
+            if (data.totalamt) {
+              product_data.totalamt = data.totalamt;
+            }
 
             Purchasedetails.findByIdAndUpdate(
               e._id,
@@ -213,81 +249,22 @@ router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
                 console.log(err);
                 // return res.status(402).send(errormessage(err));
               });
+
+            productdetails.findOneAndUpdate(
+              { name: e.name },
+              { $set: product_data },
+              { new: true }
+            )
+              .then((result) => {
+                console.log('=======', result)
+                // return res.status(200).send(successmessage(result));
+              })
+              .catch((err) => {
+                console.log('============', err);
+                // return res.status(402).send(errormessage(err));
+              });
           }
         });
-
-        // console.log("inside else");
-        // findProduct.map((e) => {
-        //   if (new ObjectId(e._id).equals(data._id)) {
-        //     let new_data = {};
-        //     // console.log("selected profuct", e);
-        //     if (data.medical) {
-        //       if (
-        //         !new ObjectId(e.medical).equals(new ObjectId(data.medical))
-        //       ) {
-        //         new_data.medical = data.medical;
-        //       }
-        //     }
-        //     if (!new ObjectId(e.product).equals(new ObjectId(data.product))) {
-        //       new_data.product = data.product;
-        //     }
-        //     if (data.salesmen) {
-        //       if (
-        //         !new ObjectId(e.salesmen).equals(new ObjectId(data.salesmen))
-        //       ) {
-        //         new_data.salesmen = data.salesmen;
-        //       }
-        //     }
-        //     if (e.qty !== data.qty) {
-        //       let updateqty = e.qty - data.qty;
-        //       if (updateqty > 0) {
-        //         updateqty = parseInt(find_party.quantity, 10) + updateqty;
-        //         new_data.qty = data.qty;
-        //         // console.log("updtqty if", updateqty);
-        //         productdetails
-        //           .updateOne(
-        //             { _id: data.product },
-        //             { $set: { quantity: updateqty } }
-        //           )
-        //           .then((result) => {
-        //             // console.log("add in product table", result);
-        //           })
-        //           .catch((err) => {
-        //             // console.log(err);
-        //           });
-        //       } else {
-        //         updateqty = parseInt(find_party.quantity, 10) + updateqty;
-        //         new_data.qty = data.qty;
-        //         // console.log("updtqty else", updateqty);
-
-        //         productdetails
-        //           .updateOne(
-        //             { _id: data.product },
-        //             { $set: { quantity: updateqty } }
-        //           )
-        //           .then((result) => {
-        //             // console.log("add in product table", result);
-        //           })
-        //           .catch((err) => {
-        //             // console.log(err);
-        //           });
-        //       }
-        //     }
-        //     if (data.amount) {
-        //       new_data.amount = data.amount;
-        //     }
-        //     // console.log("new data", new_data);
-        //     Billgeneratesub.findByIdAndUpdate(data._id, { $set: new_data })
-        //       .then((result) => {
-        //         // console.log("add in bill sub table", result);
-        //       })
-        //       .catch((err) => {
-        //         // console.log(err);
-        //       });
-        //   } else {
-        //     // console.log("else entry for delete colum", e._id);
-        //   }
-        // });
       }
 
       const findProduct = await Purchasedetails.find({ invoiceId: id });
@@ -298,12 +275,30 @@ router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
           });
         })
         .map(async (deleterecord) => {
-          Purchasedetails.findByIdAndDelete(deleterecord._id)
+          console.log('=======',deleterecord)
+          let productdetailss = await productdetails.find({ name: deleterecord.name })
+          let updtqty = productdetailss[0].quantity - parseInt(deleterecord.quantity, 10)
+          console.log(updtqty)
+          console.log('0000000000',productdetailss[0]._id)
+
+          productdetails.findOneAndUpdate(
+            { name: deleterecord.name },
+            { $set: { quantity: updtqty } },
+            { new: true }
+          )
             .then((result) => {
-              // console.log("add in bill sub table", result);
+              console.log('=======', result)
             })
             .catch((err) => {
-              // console.log(err);
+              console.log('============', err);
+            });
+
+          Purchasedetails.findByIdAndDelete(deleterecord._id)
+            .then((result) => {
+              console.log(" bill ", result);
+            })
+            .catch((err) => {
+              console.log(err);
             });
         });
 
@@ -320,6 +315,7 @@ router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
         });
     }
   } catch (error) {
+    console.log(error)
     return res.status(500).send(errormessage("Severe Error"));
   }
 });
@@ -327,18 +323,53 @@ router.post("/purchasedetails_update/:id", Authenticate, async (req, res) => {
 router.delete("/purchasedetails_delete/:id", Authenticate, async (req, res) => {
   let id = req.params.id;
   console.log(id)
-  if (!id) {
-    return res.status(402).send(errormessage("Required"));
-  } else {
-    Purchasedetails.findByIdAndDelete(id)
-      .then((result) => {
-        console.log(result)
-        return res.status(200).send(successmessage("Delete Successfully"));
-      })
-      .catch((err) => {
-        console.log(err)
-        return res.status(402).send(errormessage(err));
-      });
+  try {
+    if (!id) {
+      return res.status(402).send(errormessage("Required"));
+    } else {
+      let Purchasedetailss = await Purchasedetails.find({ invoiceId: id })
+      console.log(Purchasedetailss)
+      for (const e of Purchasedetailss) {
+        let qty;
+        let productdetailss = await productdetails.find({ name: e.name })
+        let updtqty = productdetailss[0].quantity - parseInt(e.quantity, 10)
+        console.log(e)
+        productdetails.findOneAndUpdate(
+          { name: e.name },
+          { $set: { quantity: updtqty } },
+          { new: true }
+        )
+          .then((result) => {
+            console.log('=======', result)
+          })
+          .catch((err) => {
+            console.log('============', err);
+          });
+
+
+        Purchasedetails.findByIdAndDelete(e._id)
+          .then((result) => {
+            console.log(result)
+            // return res.status(200).send(successmessage("Delete Successfully"));
+          })
+          .catch((err) => {
+            console.log(err)
+            // return res.status(402).send(errormessage(err));
+          });
+      }
+      MainPurchasetable.findOneAndDelete({ invoiceId: id })
+        .then((result) => {
+          console.log(result)
+          return res.status(200).send(successmessage("Delete Successfully"));
+        })
+        .catch((err) => {
+          console.log(err)
+          return res.status(402).send(errormessage(err));
+        });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).send(errormessage('Server Error'));
   }
 });
 module.exports = router;

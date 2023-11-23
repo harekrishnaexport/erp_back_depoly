@@ -26,6 +26,9 @@ const PurchaseDetailsSchema = new Schema({
   sellingRate: {
     type: String,
   },
+  mrp: {
+    type: Number,
+  },
   date: {
     type: Date,
     default: Date.now,
