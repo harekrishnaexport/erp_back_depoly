@@ -124,7 +124,8 @@ router.post("/createbill", Authenticate, async (req, res) => {
     }
 
     let result = record.map(async (data) => {
-      let find_party = await productdetails.findById(data.proname);
+      console.log(data)
+      let find_party = await productdetails.find({name:data.proname});
       var updadtedqty = find_party.quantity - data.qty;
 
       medicalid = data.medicalname;
