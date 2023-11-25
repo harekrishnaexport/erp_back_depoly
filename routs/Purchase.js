@@ -73,7 +73,7 @@ router.post("/purchasedetails_add", Authenticate, async (req, res) => {
           .create({
             name: data.name,
             quantity: data.quantity,
-            rate: data.rate,
+            rate: data.srate,
             mrp: data.mrp,
             expiry: data.expiry,
           })
